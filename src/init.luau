@@ -185,7 +185,7 @@ return function(source: string)
 
     function finder.with_statements(statements: { luau.AstStat }): { luau.AstExpr }
         return map(pack(map_unpack(
-                statements,
+            statements,
             function(statement: luau.AstStat)
                 return finder.with_statement(statement)
             end
