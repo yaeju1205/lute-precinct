@@ -23,24 +23,29 @@ local _ = {
 _ = require("assing")
 ]])
 
-local function tableToString(tbl)
-    local result = "{ " .. "\n"
+local function tableToString(tbl, depth)
+    depth = depth or 0
+    local indent = string.rep("\t", depth)
+    local nextIndent = string.rep("\t", depth + 1)
+
+    local result = indent .. "{\n"
 
     for k, v in pairs(tbl) do
-        result ..= tostring(k) .. " = "
+        result ..= nextIndent .. tostring(k) .. " = "
 
         if type(v) == "table" then
-            result ..= tableToString(v)
+            result ..= tableToString(v, depth + 1)
         elseif type(v) == "string" then
             result ..= '"' .. v .. '"'
         else
             result ..= tostring(v)
         end
 
-        result ..= ", " .. "\n"
+        result ..= ",\n"
     end
 
-    return result .. "}"
+    result ..= indent .. "}"
+    return result
 end
 
 print(tableToString(result))

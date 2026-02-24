@@ -1,6 +1,7 @@
 --!optimize 2
 
 local parser = require("@std/syntax/parser")
+local tableext = require("@std/tableext")
 local luau = require("@lute/luau")
 
 return function(source: string)
@@ -8,28 +9,18 @@ return function(source: string)
     local root = parse.root
     local statements = root.statements
     local lines = string.split(source, "\n")
-    
+
     local function concat_table<T>(...: { T }): { T }
         local args = table.pack(...)
         local res: { T } = {}
         for i=1, args.n do
-            for j=1, #args[i] do
-                table.insert(res, args[i][j])
-            end
-        end
-        return res
-    end
-
-    local function map<T, U>(tab: { T }, callback: (T) -> U): { U }
-        local res = {}
-        for i=1, #tab do
-            table.insert(res, callback(tab[i]))
+            tableext.extend(res,args[i] )
         end
         return res
     end
 
     local function map_unpack<T, U>(tab: { T }, callback: (T) -> U): ...U
-        return table.unpack(map(tab, callback))
+        return table.unpack(tableext.map(tab, callback))
     end
 
     local finder = {}
@@ -182,7 +173,7 @@ return function(source: string)
     function finder.with_statements(statements: { luau.AstStat }): { luau.AstExpr }
         return concat_table(map_unpack(
             statements,
-            function(statement: luau.AstStat)
+            function(statement: luau.AstStat): { luau.AstExpr }
                 return finder.with_statement(statement)
             end
         )) :: { luau.AstExpr }
