@@ -1,51 +1,33 @@
 --!nocheck
 
+local tableext = require("@std/tableext")
+local printer = require("@std/syntax/printer")
+local luau = require("@lute/luau")
 local precinct = require("./precinct")
-local result = precinct([[
-require("call")
-if require("if") then
+
+local source = [[
+require("./call")
+if require("./cond") then
 end
-while require("while") do
+while require("./while") do
 end
-for i=1, require("for") do
+for i=1, require("./for") do
 end
-for i in require("forin") do
+for i in require("./forin") do
 end
 repeat
-until require("repeat")
+until require("./repeat")
 do
-    require("do")
+    require("./do")
 end
-local _ = require("local")
+local _ = require("./local")
 local _ = {
-    a = require("table")
+    a = require("./table")
 }
-_ = require("assing")
-]])
+_ = require("./assing")
+]]
 
-local function tableToString(tbl, depth)
-    depth = depth or 0
-    local indent = string.rep("\t", depth)
-    local nextIndent = string.rep("\t", depth + 1)
+tableext.map(precinct(source), function(expression: luau.AstExpr)
+    print(`{string.sub(expression.text, 3)} require to\n    => {printer.printnode(expression)}`)
+end)
 
-    local result = indent .. "{\n"
-
-    for k, v in pairs(tbl) do
-        result ..= nextIndent .. tostring(k) .. " = "
-
-        if type(v) == "table" then
-            result ..= tableToString(v, depth + 1)
-        elseif type(v) == "string" then
-            result ..= '"' .. v .. '"'
-        else
-            result ..= tostring(v)
-        end
-
-        result ..= ",\n"
-    end
-
-    result ..= indent .. "}"
-    return result
-end
-
-print(tableToString(result))

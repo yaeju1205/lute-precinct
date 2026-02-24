@@ -1,6 +1,7 @@
 --!optimize 2
 
 local parser = require("@std/syntax/parser")
+local printer = require("@std/syntax/printer")
 local tableext = require("@std/tableext")
 local luau = require("@lute/luau")
 
@@ -27,10 +28,7 @@ return function(source: string)
 
 	function finder.with_expression(expression: luau.AstExpr): { luau.AstExpr }
 		if expression.tag == "call" then
-			local line = lines[expression.func.location.beginline]
-			local funclocation = expression.func.location
-			local funcname = string.sub(line, funclocation.begincolumn, funclocation.endcolumn - 1)
-			if funcname == "require" then
+			if printer.printnode(expression.func) == "require" then
 				if expression.self then
 					return {}
 				end
