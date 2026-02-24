@@ -1,6 +1,6 @@
 --!nocheck
 
-local precinct = require("./src")
+local precinct = require("./precinct")
 local result = precinct([[
 require("call")
 if require("if") then

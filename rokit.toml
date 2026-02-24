@@ -5,3 +5,4 @@
 
 [tools]
 lute = "luau-lang/lute@0.1.0-nightly.20260224"
+StyLua = "JohnnyMorganz/StyLua@2.3.1"
