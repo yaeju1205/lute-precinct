@@ -25,9 +25,10 @@ local _ = {
     a = require("./table")
 }
 _ = require("./assing")
+local _ = require(game.GetService)
 ]]
 
 tableext.map(precinct(source), function(expression: luau.AstExpr)
-    print(`{string.sub(expression.text, 3)} require to\n    => {printer.printnode(expression)}`)
+    print(`require to\n    => {printer.printnode(expression)}`)
 end)
 
