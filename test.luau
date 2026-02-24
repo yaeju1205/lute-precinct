@@ -17,10 +17,14 @@ do
     require("do")
 end
 local _ = require("local")
+local _ = {
+    a = require("table")
+}
+_ = require("assing")
 ]])
 
 local function tableToString(tbl)
-    local result = "{ "
+    local result = "{ " .. "\n"
 
     for k, v in pairs(tbl) do
         result ..= tostring(k) .. " = "
@@ -33,7 +37,7 @@ local function tableToString(tbl)
             result ..= tostring(v)
         end
 
-        result ..= ", "
+        result ..= ", " .. "\n"
     end
 
     return result .. "}"
