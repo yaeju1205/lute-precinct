@@ -9,7 +9,6 @@ return function(source: string)
 	local parse = parser.parse(source)
 	local root = parse.root
 	local statements = root.statements
-	local lines = string.split(source, "\n")
 
 	local function concat_table<T>(...: { T }): { T }
 		local args = table.pack(...)
