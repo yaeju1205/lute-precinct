@@ -26,6 +26,9 @@ local _ = {
 }
 _ = require("./assing")
 local _ = require(game.GetService)
+_.require("./index")
+_:require("./self")
+_["require"]("./index")
 ]]
 
 tableext.map(precinct(source), function(expression: luau.AstExpr)
