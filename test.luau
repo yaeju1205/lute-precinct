@@ -29,6 +29,10 @@ local _ = require(game.GetService)
 _.require("./index")
 _:require("./self")
 _["require"]("./index")
+_ = if require("./condexpr") then
+    1
+else
+    0
 ]]
 
 tableext.map(precinct(source), function(expression: luau.AstExpr)

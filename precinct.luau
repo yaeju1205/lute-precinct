@@ -11,16 +11,9 @@ return function(source: string)
 	local statements = root.statements
 
 	local function concat_table<T>(...: { T }): { T }
-		local args = table.pack(...)
 		local res: { T } = {}
-		for i = 1, args.n do
-			tableext.extend(res, args[i])
-		end
+		tableext.extend(res, ...)
 		return res
-	end
-
-	local function map_unpack<T, U>(tab: { [number]: T }, callback: (T) -> U): ...U
-		return table.unpack(tableext.map(tab, callback))
 	end
 
 	local finder = {}
@@ -47,33 +40,31 @@ return function(source: string)
 				finder.with_expression(expression.condition),
 				finder.with_expression(expression.elseexpr),
 				concat_table<<luau.AstExpr>>(
-					map_unpack<<luau.AstElseIfExpr, { luau.AstExpr }>>(
+					table.unpack(tableext.map<<number, luau.AstElseIfExpr, { luau.AstExpr }>>(
 						expression.elseifs, 
 						function(else_if)
 							return finder.with_expression(else_if.condition)
 						end
-					)
+					))
 				)
 			)
 		elseif expression.tag == "function" then
 			return concat_table(
-				(
-					map_unpack(expression.body.statements, function(statement: luau.AstStat): { luau.AstExpr }
-						return finder.with_statement(statement)
-					end)
-				)
+				(table.unpack(tableext.map(expression.body.statements, function(statement: luau.AstStat): { luau.AstExpr }
+					return finder.with_statement(statement)
+				end)))
 			)
 		elseif expression.tag == "group" then
 			return finder.with_expression(expression.expression)
 		elseif expression.tag == "index" then
 			return finder.with_expression(expression.index)
 		elseif expression.tag == "table" then
-			return concat_table((map_unpack(expression.entries, function(entry: luau.AstTableExprItem): { luau.AstExpr }
+			return concat_table((table.unpack(tableext.map(expression.entries, function(entry: luau.AstTableExprItem): { luau.AstExpr }
 				if entry.kind == "general" then
 					return concat_table(finder.with_expression(entry.key), finder.with_expression(entry.value))
 				end
 				return finder.with_expression(entry.value)
-			end)))
+			end))))
 		elseif expression.tag == "unary" then
 			return finder.with_expression(expression.operand)
 		end
@@ -84,14 +75,14 @@ return function(source: string)
 		if statement.tag == "assign" then
 			return concat_table<<luau.AstExpr>>(
 				concat_table<<luau.AstExpr>>(
-					map_unpack(statement.variables, function(variable)
+					table.unpack(tableext.map(statement.variables, function(variable)
 						return finder.with_expression(variable.node)
-					end)
+					end))
 				),
 				concat_table<<luau.AstExpr>>(
-					map_unpack(statement.values, function(value)
+					table.unpack(tableext.map(statement.values, function(value)
 						return finder.with_expression(value.node)
-					end)
+					end))
 				)
 			)
 		elseif statement.tag == "block" then
@@ -100,9 +91,9 @@ return function(source: string)
 			return concat_table(
 				finder.with_expression(statement.condition),
 				concat_table<<luau.AstExpr>>(
-					map_unpack(statement.elseifs, function(else_if)
+					table.unpack(tableext.map(statement.elseifs, function(else_if)
 						return finder.with_expression(else_if.condition)
-					end)
+					end))
 				),
 				if statement.elseblock then
 					finder.with_statements(statement.elseblock.statements)
@@ -124,9 +115,9 @@ return function(source: string)
 		elseif statement.tag == "forin" then
 			return concat_table(
 				concat_table<<luau.AstExpr>>(
-					map_unpack(statement.values, function(value)
+					table.unpack(tableext.map(statement.values, function(value)
 						return finder.with_expression(value.node)
-					end)
+					end))
 				),
 				finder.with_statements(statement.body.statements)
 			)
@@ -137,9 +128,9 @@ return function(source: string)
 		elseif statement.tag == "local" then
 			return concat_table(
 				concat_table<<luau.AstExpr>>(
-					map_unpack(statement.values, function(value)
+					table.unpack(tableext.map(statement.values, function(value)
 						return finder.with_expression(value.node)
-					end)
+					end))
 				)
 			)
 		elseif statement.tag == "localfunction" then
@@ -152,12 +143,12 @@ return function(source: string)
 		elseif statement.tag == "return" then
 			return concat_table(
 				concat_table<<luau.AstExpr>>(
-					map_unpack(
+					table.unpack(tableext.map(
 						statement.expressions,
 						function(expression)
 							return finder.with_expression(expression.node)
 						end
-					)
+					))
 				)
 			)
 		elseif statement.tag == "while" then
@@ -172,9 +163,9 @@ return function(source: string)
 
 	function finder.with_statements(statements: { luau.AstStat }): { luau.AstExpr }
 		return concat_table<<luau.AstExpr>>(
-				map_unpack(statements, function(statement)
+				table.unpack(tableext.map(statements, function(statement)
 					return finder.with_statement(statement)
-				end)
+				end))
 			)
 	end
 
